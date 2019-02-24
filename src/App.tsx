@@ -16,8 +16,26 @@ interface AppState {
 	grid: GridElement[][];
 }
 
+const columns = [
+	'Nombre alumno',
+	'Unidad 1',
+	'Unidad 2',
+	'Unidad 3',
+	'Unidad 4',
+	'Unidad 5',
+	'Unidad 6',
+	'Unidad 7',
+	'Unidad 8',
+	'Unidad 9',
+	'Unidad 10',
+	'Pruebas',
+	'Cuadernos y tareas',
+	'Observación diaria',
+	'Nota final'
+];
+
 //You can also strongly type all the Components or SFCs that you pass into ReactDataSheet.
-let cellRenderer: ReactDataSheet.CellRenderer<GridElement, number> = (props) => {
+const cellRenderer: ReactDataSheet.CellRenderer<GridElement, number> = (props) => {
 	const color = props.cell.readOnly ? 'grey' : undefined
 	const style = { padding: '16px', background: color };
 	return (
@@ -117,6 +135,19 @@ export class App extends React.Component<{}, AppState> {
 					<MyReactDataSheet
 						data={this.state.grid}
 						valueRenderer={(cell) => cell.value}
+						sheetRenderer={props => (
+							<table className={props.className}>
+								<thead>
+									<tr>
+										<th className='action-cell' />
+										{columns.map(col => (<th>{col}</th>))}
+									</tr>
+								</thead>
+								<tbody>
+									{props.children}
+								</tbody>
+							</table>
+						)}
 						onCellsChanged={changes => {
 							const grid = this.state.grid.map(row => [...row])
 							changes.forEach(({ cell, row, col, value }) => {
