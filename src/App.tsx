@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
-import { Pane, Button, Text, Heading, Select } from 'evergreen-ui';
+import { Pane, Button, Text, Heading, Select, TextInput } from 'evergreen-ui';
 import { StudentEvaluation, calculateGrades, GradesConfig } from './StudentEvaluation';
 
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
@@ -168,6 +168,21 @@ export class App extends React.Component<{}, AppState> {
 				</Pane>
 
 				<Button marginTop={16} onClick={this.addRow} appearance="primary">Añadir fila</Button>
+
+				<Pane marginTop={48}>
+						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje pruebas: </Text>
+						<TextInput width={40}></TextInput>
+				</Pane>
+
+				<Pane marginTop={4}>
+						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje cuadernos y tareas: </Text>
+						<TextInput width={40}></TextInput>
+				</Pane>
+
+				<Pane marginTop={4}>
+						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje observación diaria: </Text>
+						<TextInput width={40}></TextInput>
+				</Pane>
 
 			</Pane>
 		)

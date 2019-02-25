@@ -31,3 +31,8 @@
     transform: rotate(360deg);
   }
 }
+
+.configPercentageText {
+  display: inline-block;
+  text-align: right;
+}
