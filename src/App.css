@@ -32,7 +32,21 @@
   }
 }
 
-.configPercentageText {
-  display: inline-block;
-  text-align: right;
+th.rotate {
+  /* Something you can count on */
+  height: 110px;
+  white-space: nowrap;
+}
+
+th.rotate > div {
+  transform: 
+    /* Magic Numbers */
+    translate(0px, 40px)
+    /* 45 is really 360 - 45 */
+    rotate(315deg);
+  width: 30px;
+}
+th.rotate > div > span {
+  border-bottom: 1px solid #ccc;
+  padding: 2px 5px;
 }

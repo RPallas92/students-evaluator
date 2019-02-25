@@ -119,7 +119,7 @@ export class App extends React.Component<{}, AppState> {
 	}
 	render() {
 		return (
-			<Pane height="100%" paddingLeft={48} paddingTop={32} paddingBottom={32} paddingRight={48} background="tint2" borderRadius={3}>
+			<Pane height="100%" paddingLeft={32} paddingTop={32} paddingBottom={32} paddingRight={32} background="tint2" borderRadius={3}>
 
 				<Heading size={2000}>Lengua - Primer timestre 2019 </Heading>
 
@@ -140,7 +140,7 @@ export class App extends React.Component<{}, AppState> {
 								<thead>
 									<tr>
 										<th className='action-cell' />
-										{columns.map(col => (<th>{col}</th>))}
+										{columns.map(col => (<th className='rotate'> <div><span>{col} </span></div></th>))}
 									</tr>
 								</thead>
 								<tbody>
