@@ -32,6 +32,11 @@
   }
 }
 
+.configPercentageText {
+  display: inline-block;
+  text-align: right;
+}
+
 th.rotate {
   /* Something you can count on */
   height: 110px;
