@@ -182,13 +182,19 @@ export class App extends React.Component<{}, AppState> {
     })
   }
 
+  changeTitle = (title: string) => {
+    let currentEvaluation = {...this.state.currentEvaluation, name: title}
+    this.setState({...this.state, currentEvaluation})
+  }
+
   render() {
     return (
       <Pane height="100%" paddingLeft={32} paddingTop={32} paddingBottom={32} paddingRight={32} background="tint2" borderRadius={3}>
         <TextInput
           name="text-input-name"
           className="title"
-          value={"Lengua - Primer trimestre 2019"} />
+          onChange={(e: any) => this.changeTitle(e.target.value)}
+          value={this.state.currentEvaluation.name} />
 
         <Pane >
           <Select width={240} marginTop={16}>
