@@ -3,7 +3,7 @@ import './App.css';
 import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
 import { Pane, Button, Text, Heading, Select, TextInput } from 'evergreen-ui';
-import { StudentEvaluation, calculateGrades, GradesConfig } from './StudentEvaluation';
+import { StudentEvaluation, calculateGrades, GradesConfig, isConfigValid } from './StudentEvaluation';
 
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
 	value: string | number | null;
@@ -13,7 +13,8 @@ class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
 
 interface AppState {
 	evaluations: StudentEvaluation[];
-	grid: GridElement[][];
+  grid: GridElement[][];
+  currentConfig: GradesConfig
 }
 
 const columns = [
@@ -105,7 +106,12 @@ export class App extends React.Component<{}, AppState> {
 			evaluations: [
 				firstEvaluation
 			],
-			grid: evaluationsToGrid([firstEvaluation])
+      grid: evaluationsToGrid([firstEvaluation]),
+      currentConfig: {
+        unitsGradePercentage: 40,
+        tasksGradePercentahe: 40,
+        dailyGradePercentage: 20
+      }
 		}
 	}
 
@@ -116,7 +122,22 @@ export class App extends React.Component<{}, AppState> {
 		this.state.evaluations.push(evaluation)
 		this.state.grid.push(evaluationToGridRow(evaluation))
 		this.setState(this.state)
-	}
+  }
+  
+  configPercentageChanged = () => {
+    const unitsGradePercentage = 40;
+    const tasksGradePercentahe = 40;
+    const dailyGradePercentage = 40;
+
+    const newConfig: GradesConfig = {unitsGradePercentage, tasksGradePercentahe, dailyGradePercentage}
+    if (isConfigValid(newConfig)) {
+      // TODO Ricarod set config in current state
+    } else {
+      // TODO Ricardo show error red
+    }
+
+  }
+
 	render() {
 		return (
 			<Pane height="100%" paddingLeft={32} paddingTop={32} paddingBottom={32} paddingRight={32} background="tint2" borderRadius={3}>
@@ -171,17 +192,17 @@ export class App extends React.Component<{}, AppState> {
 
 				<Pane marginTop={48}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje pruebas: </Text>
-						<TextInput width={40}></TextInput>
+						<TextInput width={40} onChange={this.configPercentageChanged} value={this.state.currentConfig.unitsGradePercentage}></TextInput>
 				</Pane>
 
 				<Pane marginTop={4}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje cuadernos y tareas: </Text>
-						<TextInput width={40}></TextInput>
+						<TextInput width={40} onChange={this.configPercentageChanged} value={this.state.currentConfig.tasksGradePercentahe}></TextInput>
 				</Pane>
 
 				<Pane marginTop={4}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje observación diaria: </Text>
-						<TextInput width={40}></TextInput>
+						<TextInput width={40} onChange={this.configPercentageChanged} value={this.state.currentConfig.dailyGradePercentage}></TextInput>
 				</Pane>
 
 			</Pane>
