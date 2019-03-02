@@ -16,6 +16,7 @@ interface AppState {
   grid: GridElement[][];
   currentValidConfig: GradesConfig;
   nextConfigCandidate: GradesConfig;
+  nextConfigCandidateValid: boolean;
 }
 
 const columns = [
@@ -117,7 +118,8 @@ export class App extends React.Component<{}, AppState> {
         unitsGradePercentage: 40,
         tasksGradePercentage: 40,
         dailyGradePercentage: 20
-      }
+      },
+      nextConfigCandidateValid: true
 		}
 	}
 
@@ -131,19 +133,19 @@ export class App extends React.Component<{}, AppState> {
   }
 
   unitsGradeConfigChanged = (value: string) => {
-    const valueNumber = parseInt(value, 10);
+    const valueNumber = parseInt(value, 10)|| 0;
     const configCandidate = {...this.state.nextConfigCandidate, unitsGradePercentage: valueNumber }
     this.configPercentageChanged(configCandidate)
   }
 
   tasksGradeConfigChanged = (value: string) => {
-    const valueNumber = parseInt(value, 10);
+    const valueNumber = parseInt(value, 10)|| 0;
     const configCandidate = {...this.state.nextConfigCandidate, tasksGradePercentage: valueNumber}
     this.configPercentageChanged(configCandidate)
   }
 
   dailyGradeConfigChanged = (value: string) => {
-    const valueNumber = parseInt(value, 10);
+    const valueNumber = parseInt(value, 10)|| 0;
     const configCandidate = {...this.state.nextConfigCandidate, dailyGradePercentage: valueNumber }
     this.configPercentageChanged(configCandidate)
   }
@@ -153,12 +155,12 @@ export class App extends React.Component<{}, AppState> {
     console.log(newConfig)
     if (isConfigValid(newConfig)) {
       console.log("next config valid")
-      this.setState({...this.state, nextConfigCandidate: newConfig, currentValidConfig: newConfig}, () => {
+      this.setState({...this.state, nextConfigCandidate: newConfig, currentValidConfig: newConfig, nextConfigCandidateValid: true }, () => {
         this.updateEvaluations(this.state.evaluations, newConfig)
       })
     } else {
       console.log("next config NOT valid")
-      this.setState({...this.state, nextConfigCandidate: newConfig})
+      this.setState({...this.state, nextConfigCandidate: newConfig, nextConfigCandidateValid: false})
     }
   }
 
@@ -217,17 +219,17 @@ export class App extends React.Component<{}, AppState> {
 
 				<Pane marginTop={48}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje pruebas: </Text>
-						<TextInput width={40} onChange={(e: any) => this.unitsGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.unitsGradePercentage}></TextInput>
+						<TextInput isInvalid={!this.state.nextConfigCandidateValid} width={40} onChange={(e: any) => this.unitsGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.unitsGradePercentage}></TextInput>
 				</Pane>
 
 				<Pane marginTop={4}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje cuadernos y tareas: </Text>
-						<TextInput width={40} onChange={(e: any) => this.tasksGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.tasksGradePercentage}></TextInput>
+						<TextInput isInvalid={!this.state.nextConfigCandidateValid}  width={40} onChange={(e: any) => this.tasksGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.tasksGradePercentage}></TextInput>
 				</Pane>
 
 				<Pane marginTop={4}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje observación diaria: </Text>
-						<TextInput width={40} onChange={(e: any) => this.dailyGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.dailyGradePercentage}></TextInput>
+						<TextInput isInvalid={!this.state.nextConfigCandidateValid}  width={40} onChange={(e: any) => this.dailyGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.dailyGradePercentage}></TextInput>
 				</Pane>
 
 			</Pane>
