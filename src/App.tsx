@@ -140,7 +140,7 @@ export class App extends React.Component<{}, AppState> {
 								<thead>
 									<tr>
 										<th className='action-cell' />
-										{columns.map(col => (<th className='rotate'> <div><span>{col} </span></div></th>))}
+										{columns.map((col, index) => (<th key={index} className='rotate'> <div><span>{col} </span></div></th>))}
 									</tr>
 								</thead>
 								<tbody>
