@@ -83,7 +83,6 @@ function gridRowToEvaluation(row: GridElement[]): StudentEvaluation {
   const id = row[0].value as number
   const name = row[1].value as string
   const units = row.slice(2, indexAfterUnits).map((unit) => parseFloat(`${unit.value}` || "0"))
-  console.log(units)
   const unitsGrade = parseFloat(`${row[indexAfterUnits].value}` || "0")
   const tasksGrade = parseFloat(`${row[indexAfterUnits + 1].value}` || "0")
   const dailyGrade = parseFloat(`${row[indexAfterUnits + 2].value}` || "0")
@@ -98,6 +97,11 @@ function gridRowToEvaluation(row: GridElement[]): StudentEvaluation {
     dailyGrade,
     finalGrade
   }
+}
+
+function isThereAnyStudentWithoutName(evaluations: StudentEvaluation[]): boolean {
+  const studentWithoutName = evaluations.find((evaluation) => !evaluation.name)
+  return studentWithoutName ? true : false
 }
 
 export class App extends React.Component<{}, AppState> {
@@ -121,13 +125,12 @@ export class App extends React.Component<{}, AppState> {
         dailyGradePercentage: 20
       },
       nextConfigCandidateValid: true,
-      deleteDialogShown: true
+      deleteDialogShown: false
     }
   }
 
   addRow = () => {
-    const lastId = this.state.evaluations[this.state.evaluations.length - 1].id
-    console.log(lastId)
+    const lastId = this.state.evaluations.length > 0 ? this.state.evaluations[this.state.evaluations.length - 1].id : 0
     const evaluation = { id: lastId + 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
     this.state.evaluations.push(evaluation)
     this.state.grid.push(evaluationToGridRow(evaluation))
@@ -153,28 +156,27 @@ export class App extends React.Component<{}, AppState> {
   }
 
   configPercentageChanged = (newConfig: GradesConfig) => {
-    console.log("currentCofnig")
     console.log(newConfig)
     if (isConfigValid(newConfig)) {
-      console.log("next config valid")
       this.setState({ ...this.state, nextConfigCandidate: newConfig, currentValidConfig: newConfig, nextConfigCandidateValid: true }, () => {
         this.updateEvaluations(this.state.evaluations, newConfig)
       })
     } else {
-      console.log("next config NOT valid")
       this.setState({ ...this.state, nextConfigCandidate: newConfig, nextConfigCandidateValid: false })
     }
   }
 
-  updateEvaluations = (evaluations: StudentEvaluation[], config: GradesConfig) => {
+  updateEvaluations = (evaluations: StudentEvaluation[], config: GradesConfig, callback?: () => void) => {
     const recalculatedEvaluations = calculateGrades(evaluations, config)
-    console.log(recalculatedEvaluations)
     const recalculatedGrid = evaluationsToGrid(recalculatedEvaluations)
-    this.setState({ ...this.state, grid: recalculatedGrid, evaluations: recalculatedEvaluations })
+    this.setState({ ...this.state, grid: recalculatedGrid, evaluations: recalculatedEvaluations }, callback)
   }
 
   deleteStudentsWithoutName = () => {
-    this.setState({...this.state, deleteDialogShown: false})
+    const evaluations = this.state.evaluations.filter((evaluation) => evaluation.name)
+    this.setState({...this.state, deleteDialogShown: false}, () => {
+      this.updateEvaluations(evaluations, this.state.currentValidConfig)
+    })
   }
 
   render() {
@@ -215,7 +217,11 @@ export class App extends React.Component<{}, AppState> {
               })
               const evaluations = gridToEvaluations(grid)
               const config = this.state.currentValidConfig
-              this.updateEvaluations(evaluations, config)
+              this.updateEvaluations(evaluations, config, () => {
+                if (isThereAnyStudentWithoutName(evaluations)) {
+                  this.setState({...this.state, deleteDialogShown: true})
+                }
+              })
             }}
             cellRenderer={cellRenderer}
           />
@@ -244,7 +250,8 @@ export class App extends React.Component<{}, AppState> {
           intent="danger"
           confirmLabel="Sí"
           cancelLabel="No"
-          onConfirm={this.deleteStudentsWithoutName}>
+          onConfirm={this.deleteStudentsWithoutName}
+          onCancel={() => (this.setState({...this.state, deleteDialogShown: false}))}>
           ¿Desea borrar el alumno?
       </Dialog>
 
