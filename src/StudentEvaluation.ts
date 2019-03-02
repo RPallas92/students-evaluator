@@ -10,12 +10,12 @@ export interface StudentEvaluation {
 
 export interface GradesConfig {
 	unitsGradePercentage: number
-	tasksGradePercentahe: number
+	tasksGradePercentage: number
 	dailyGradePercentage: number
 }
 
 export function isConfigValid(config: GradesConfig): boolean {
-	return config.unitsGradePercentage + config.tasksGradePercentahe + config.dailyGradePercentage == 100
+	return config.unitsGradePercentage + config.tasksGradePercentage + config.dailyGradePercentage == 100
 }
 
 export function calculateGrades(evaluations: StudentEvaluation[], config: GradesConfig): StudentEvaluation[] {
@@ -24,6 +24,6 @@ export function calculateGrades(evaluations: StudentEvaluation[], config: Grades
 
 export function calculateGradesForEvaluation(evaluation: StudentEvaluation, config: GradesConfig): StudentEvaluation {
 	const unitsGrade = evaluation.units.reduce((acc, unit) => unit + acc, 0) / evaluation.units.length
-	const finalGrade = ((unitsGrade * config.unitsGradePercentage) + (evaluation.dailyGrade * config.dailyGradePercentage) + (evaluation.tasksGrade * config.tasksGradePercentahe)) / 100
+	const finalGrade = ((unitsGrade * config.unitsGradePercentage) + (evaluation.dailyGrade * config.dailyGradePercentage) + (evaluation.tasksGrade * config.tasksGradePercentage)) / 100
 	return {...evaluation, unitsGrade, finalGrade}
 }

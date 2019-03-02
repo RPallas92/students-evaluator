@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, SyntheticEvent } from 'react';
 import './App.css';
 import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
@@ -14,7 +14,8 @@ class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
 interface AppState {
 	evaluations: StudentEvaluation[];
   grid: GridElement[][];
-  currentConfig: GradesConfig
+  currentValidConfig: GradesConfig;
+  nextConfigCandidate: GradesConfig;
 }
 
 const columns = [
@@ -107,9 +108,14 @@ export class App extends React.Component<{}, AppState> {
 				firstEvaluation
 			],
       grid: evaluationsToGrid([firstEvaluation]),
-      currentConfig: {
+      currentValidConfig: {
         unitsGradePercentage: 40,
-        tasksGradePercentahe: 40,
+        tasksGradePercentage: 40,
+        dailyGradePercentage: 20
+      },
+      nextConfigCandidate: {
+        unitsGradePercentage: 40,
+        tasksGradePercentage: 40,
         dailyGradePercentage: 20
       }
 		}
@@ -123,18 +129,36 @@ export class App extends React.Component<{}, AppState> {
 		this.state.grid.push(evaluationToGridRow(evaluation))
 		this.setState(this.state)
   }
-  
-  configPercentageChanged = () => {
-    const unitsGradePercentage = 40;
-    const tasksGradePercentahe = 40;
-    const dailyGradePercentage = 40;
 
-    const newConfig: GradesConfig = {unitsGradePercentage, tasksGradePercentahe, dailyGradePercentage}
+  unitsGradeConfigChanged = (value: string) => {
+    const valueNumber = parseInt(value, 10);
+    const configCandidate = {...this.state.nextConfigCandidate, unitsGradePercentage: valueNumber }
+    this.configPercentageChanged(configCandidate)
+  }
+
+  tasksGradeConfigChanged = (value: string) => {
+    const valueNumber = parseInt(value, 10);
+    const configCandidate = {...this.state.nextConfigCandidate, tasksGradePercentage: valueNumber}
+    this.configPercentageChanged(configCandidate)
+  }
+
+  dailyGradeConfigChanged = (value: string) => {
+    const valueNumber = parseInt(value, 10);
+    const configCandidate = {...this.state.nextConfigCandidate, dailyGradePercentage: valueNumber }
+    this.configPercentageChanged(configCandidate)
+  }
+  
+  configPercentageChanged = (newConfig: GradesConfig) => {
+    console.log("currentCofnig")
+    console.log(newConfig)
     if (isConfigValid(newConfig)) {
       // TODO Ricarod set config in current state
+      console.log("next config valid")
     } else {
-      // TODO Ricardo show error red
+      console.log("next config NOT valid")
     }
+
+    this.setState({...this.state, nextConfigCandidate: newConfig})
 
   }
 
@@ -177,7 +201,7 @@ export class App extends React.Component<{}, AppState> {
 							const evaluations = gridToEvaluations(grid)
 							const config: GradesConfig = {
 								unitsGradePercentage: 50,
-								tasksGradePercentahe: 30,
+								tasksGradePercentage: 30,
 								dailyGradePercentage: 20
 							}
 							const recalculatedEvaluations = calculateGrades(evaluations, config)
@@ -192,17 +216,17 @@ export class App extends React.Component<{}, AppState> {
 
 				<Pane marginTop={48}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje pruebas: </Text>
-						<TextInput width={40} onChange={this.configPercentageChanged} value={this.state.currentConfig.unitsGradePercentage}></TextInput>
+						<TextInput width={40} onChange={(e: any) => this.unitsGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.unitsGradePercentage}></TextInput>
 				</Pane>
 
 				<Pane marginTop={4}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje cuadernos y tareas: </Text>
-						<TextInput width={40} onChange={this.configPercentageChanged} value={this.state.currentConfig.tasksGradePercentahe}></TextInput>
+						<TextInput width={40} onChange={(e: any) => this.tasksGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.tasksGradePercentage}></TextInput>
 				</Pane>
 
 				<Pane marginTop={4}>
 						<Text className="configPercentageText" width={210} marginRight={4}>Porcentaje observación diaria: </Text>
-						<TextInput width={40} onChange={this.configPercentageChanged} value={this.state.currentConfig.dailyGradePercentage}></TextInput>
+						<TextInput width={40} onChange={(e: any) => this.dailyGradeConfigChanged(e.target.value)} value={this.state.nextConfigCandidate.dailyGradePercentage}></TextInput>
 				</Pane>
 
 			</Pane>
