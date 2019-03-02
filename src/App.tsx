@@ -152,14 +152,21 @@ export class App extends React.Component<{}, AppState> {
     console.log("currentCofnig")
     console.log(newConfig)
     if (isConfigValid(newConfig)) {
-      // TODO Ricarod set config in current state
       console.log("next config valid")
+      this.setState({...this.state, nextConfigCandidate: newConfig, currentValidConfig: newConfig}, () => {
+        this.updateEvaluations(this.state.evaluations, newConfig)
+      })
     } else {
       console.log("next config NOT valid")
+      this.setState({...this.state, nextConfigCandidate: newConfig})
     }
+  }
 
-    this.setState({...this.state, nextConfigCandidate: newConfig})
-
+  updateEvaluations = (evaluations: StudentEvaluation[], config: GradesConfig) => {
+    const recalculatedEvaluations = calculateGrades(evaluations, config)
+    console.log(recalculatedEvaluations)
+    const recalculatedGrid = evaluationsToGrid(recalculatedEvaluations)
+    this.setState({...this.state, grid: recalculatedGrid, evaluations: recalculatedEvaluations })
   }
 
 	render() {
@@ -199,14 +206,8 @@ export class App extends React.Component<{}, AppState> {
 								grid[row][col] = { ...grid[row][col], value }
 							})
 							const evaluations = gridToEvaluations(grid)
-							const config: GradesConfig = {
-								unitsGradePercentage: 50,
-								tasksGradePercentage: 30,
-								dailyGradePercentage: 20
-							}
-							const recalculatedEvaluations = calculateGrades(evaluations, config)
-							const recalculatedGrid = evaluationsToGrid(recalculatedEvaluations)
-							this.setState({ grid: recalculatedGrid, evaluations: recalculatedEvaluations })
+							const config = this.state.currentValidConfig
+              this.updateEvaluations(evaluations, config)
 						}}
 						cellRenderer={cellRenderer}
 					/>
