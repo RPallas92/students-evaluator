@@ -1,9 +1,9 @@
-import React, { Component, SyntheticEvent } from 'react';
+import React, {  } from 'react';
 import './App.css';
 import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
 import { Pane, Button, Text, Heading, Select, TextInput, Dialog } from 'evergreen-ui';
-import { StudentEvaluation, calculateGrades, GradesConfig, isConfigValid } from './StudentEvaluation';
+import { StudentEvaluation, StudentEvaluations, calculateGrades, GradesConfig, isConfigValid } from './StudentEvaluation';
 
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
   value: string | number | null;
@@ -12,7 +12,8 @@ export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
 class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
 
 interface AppState {
-  evaluations: StudentEvaluation[];
+  evaluations: StudentEvaluations[];
+  currentEvaluation: StudentEvaluations;
   grid: GridElement[][];
   currentValidConfig: GradesConfig;
   nextConfigCandidate: GradesConfig;
@@ -109,11 +110,11 @@ export class App extends React.Component<{}, AppState> {
     super(props)
 
     const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
+    const evaluation = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation]}
     this.state = {
-      evaluations: [
-        firstEvaluation
-      ],
-      grid: evaluationsToGrid([firstEvaluation]),
+      evaluations: [evaluation],
+      currentEvaluation: evaluation,
+      grid: evaluationsToGrid(evaluation.evaluations),
       currentValidConfig: {
         unitsGradePercentage: 40,
         tasksGradePercentage: 40,
@@ -130,9 +131,9 @@ export class App extends React.Component<{}, AppState> {
   }
 
   addRow = () => {
-    const lastId = this.state.evaluations.length > 0 ? this.state.evaluations[this.state.evaluations.length - 1].id : 0
+    const lastId = this.state.currentEvaluation.evaluations.length > 0 ? this.state.currentEvaluation.evaluations[this.state.currentEvaluation.evaluations.length - 1].id : 0
     const evaluation = { id: lastId + 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-    this.state.evaluations.push(evaluation)
+    this.state.currentEvaluation.evaluations.push(evaluation)
     this.state.grid.push(evaluationToGridRow(evaluation))
     this.setState(this.state)
   }
@@ -159,7 +160,7 @@ export class App extends React.Component<{}, AppState> {
     console.log(newConfig)
     if (isConfigValid(newConfig)) {
       this.setState({ ...this.state, nextConfigCandidate: newConfig, currentValidConfig: newConfig, nextConfigCandidateValid: true }, () => {
-        this.updateEvaluations(this.state.evaluations, newConfig)
+        this.updateEvaluations(this.state.currentEvaluation.evaluations, newConfig)
       })
     } else {
       this.setState({ ...this.state, nextConfigCandidate: newConfig, nextConfigCandidateValid: false })
@@ -169,11 +170,13 @@ export class App extends React.Component<{}, AppState> {
   updateEvaluations = (evaluations: StudentEvaluation[], config: GradesConfig, callback?: () => void) => {
     const recalculatedEvaluations = calculateGrades(evaluations, config)
     const recalculatedGrid = evaluationsToGrid(recalculatedEvaluations)
-    this.setState({ ...this.state, grid: recalculatedGrid, evaluations: recalculatedEvaluations }, callback)
+    const evaluation = { ...this.state.currentEvaluation, evaluations: recalculatedEvaluations}
+
+    this.setState({ ...this.state, grid: recalculatedGrid, currentEvaluation: evaluation}, callback)
   }
 
   deleteStudentsWithoutName = () => {
-    const evaluations = this.state.evaluations.filter((evaluation) => evaluation.name)
+    const evaluations = this.state.currentEvaluation.evaluations.filter((evaluation) => evaluation.name)
     this.setState({ ...this.state, deleteDialogShown: false }, () => {
       this.updateEvaluations(evaluations, this.state.currentValidConfig)
     })
@@ -185,7 +188,7 @@ export class App extends React.Component<{}, AppState> {
         <TextInput
           name="text-input-name"
           className="title"
-          value={"Lengua - Primer timestre 2019"} />
+          value={"Lengua - Primer trimestre 2019"} />
 
         <Pane >
           <Select width={240} marginTop={16}>
