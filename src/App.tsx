@@ -174,7 +174,7 @@ export class App extends React.Component<{}, AppState> {
 
   deleteStudentsWithoutName = () => {
     const evaluations = this.state.evaluations.filter((evaluation) => evaluation.name)
-    this.setState({...this.state, deleteDialogShown: false}, () => {
+    this.setState({ ...this.state, deleteDialogShown: false }, () => {
       this.updateEvaluations(evaluations, this.state.currentValidConfig)
     })
   }
@@ -182,8 +182,10 @@ export class App extends React.Component<{}, AppState> {
   render() {
     return (
       <Pane height="100%" paddingLeft={32} paddingTop={32} paddingBottom={32} paddingRight={32} background="tint2" borderRadius={3}>
-
-        <Heading size={2000}>Lengua - Primer timestre 2019 </Heading>
+        <TextInput
+          name="text-input-name"
+          className="title"
+          value={"Lengua - Primer timestre 2019"} />
 
         <Pane >
           <Select width={240} marginTop={16}>
@@ -219,7 +221,7 @@ export class App extends React.Component<{}, AppState> {
               const config = this.state.currentValidConfig
               this.updateEvaluations(evaluations, config, () => {
                 if (isThereAnyStudentWithoutName(evaluations)) {
-                  this.setState({...this.state, deleteDialogShown: true})
+                  this.setState({ ...this.state, deleteDialogShown: true })
                 }
               })
             }}
@@ -251,7 +253,7 @@ export class App extends React.Component<{}, AppState> {
           confirmLabel="Sí"
           cancelLabel="No"
           onConfirm={this.deleteStudentsWithoutName}
-          onCancel={() => (this.setState({...this.state, deleteDialogShown: false}))}>
+          onCancel={() => (this.setState({ ...this.state, deleteDialogShown: false }))}>
           ¿Desea borrar el alumno?
       </Dialog>
 

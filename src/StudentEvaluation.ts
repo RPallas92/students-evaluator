@@ -1,3 +1,8 @@
+export interface StudentEvaluations {
+  name: string
+  evaluations: StudentEvaluation[]
+}
+
 export interface StudentEvaluation {
 	id: number
 	name: string
