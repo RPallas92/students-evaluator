@@ -198,8 +198,7 @@ export class App extends React.Component<{}, AppState> {
 
         <Pane >
           <Select width={240} marginTop={16}>
-            <option value="foo">Foo</option>
-            <option value="bar">Bar</option>
+            {this.state.evaluations.map((evaluation) => (<option value="foo">{evaluation.name}</option>))}
           </Select>
           <Button marginLeft={16} appearance="primary">Añadir tabla</Button>
         </Pane>
