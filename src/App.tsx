@@ -183,8 +183,28 @@ export class App extends React.Component<{}, AppState> {
   }
 
   changeTitle = (title: string) => {
-    let currentEvaluation = {...this.state.currentEvaluation, name: title}
-    this.setState({...this.state, currentEvaluation})
+    const currentEvaluation = {...this.state.currentEvaluation, name: title}
+    const evaluations = this.state.evaluations.map((evaluation) => {
+      if (evaluation.name === this.state.currentEvaluation.name) {
+        evaluation.name = title
+      }
+      return evaluation
+    })
+    this.setState({...this.state, currentEvaluation, evaluations})
+  }
+
+  addEvaluation = () => {
+    const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
+    const evaluation = { name: "Nueva evaluación", evaluations: [firstEvaluation]}
+    const evaluations = this.state.evaluations.concat(evaluation)
+    this.setState({...this.state, evaluations, currentEvaluation: evaluation})
+  }
+
+  changeCurrentEvaluation = (evaluationName: string) => {
+    const evaluation = this.state.evaluations.find((evaluation) => (evaluation.name === evaluationName))
+    if (evaluation) {
+      this.setState({...this.state, currentEvaluation: evaluation})
+    }
   }
 
   render() {
@@ -197,10 +217,10 @@ export class App extends React.Component<{}, AppState> {
           value={this.state.currentEvaluation.name} />
 
         <Pane >
-          <Select width={240} marginTop={16}>
-            {this.state.evaluations.map((evaluation) => (<option value="foo">{evaluation.name}</option>))}
+          <Select width={240} marginTop={16} value={this.state.currentEvaluation.name} onChange={(event:any) => this.changeCurrentEvaluation(event.target.value)}>
+            {this.state.evaluations.map((evaluation) => (<option value={evaluation.name}>{evaluation.name}</option>))}
           </Select>
-          <Button marginLeft={16} appearance="primary">Añadir tabla</Button>
+          <Button marginLeft={16} appearance="primary" onClick={this.addEvaluation}>Añadir tabla</Button>
         </Pane>
 
         <Pane marginTop={48}>
