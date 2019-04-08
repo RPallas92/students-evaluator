@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/students-evaluator/static/css/2.f8ef439a.chunk.css"
   },
   {
-    "revision": "087500235e66ea05383ff03e7ea5d891",
+    "revision": "a52bdf4f5a7527814a09011c753c3877",
     "url": "/students-evaluator/index.html"
   }
 ];
