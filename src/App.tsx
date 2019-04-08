@@ -195,16 +195,32 @@ export class App extends React.Component<{}, AppState> {
 
   addEvaluation = () => {
     const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-    const evaluation = { name: "Nueva evaluación", evaluations: [firstEvaluation]}
+    const evaluation = { name: "Nueva evaluación " + Date.now(), evaluations: [firstEvaluation]}
     const evaluations = this.state.evaluations.concat(evaluation)
-    this.setState({...this.state, evaluations, currentEvaluation: evaluation})
+    this.setState({...this.state, evaluations}, () => {
+      this.changeCurrentEvaluation(evaluation.name)
+    })
   }
 
   changeCurrentEvaluation = (evaluationName: string) => {
-    const evaluation = this.state.evaluations.find((evaluation) => (evaluation.name === evaluationName))
-    if (evaluation) {
-      this.setState({...this.state, currentEvaluation: evaluation})
-    }
+    // TODO refactor as save current evaluation grades
+    const currentEvaluation = this.state.currentEvaluation
+    const recalculatedEvaluations = calculateGrades(currentEvaluation.evaluations, this.state.currentValidConfig)
+    const evaluations = this.state.evaluations.map((anEvaluation) => {
+      if(anEvaluation.name === currentEvaluation.name) {
+        anEvaluation.evaluations = recalculatedEvaluations
+      }
+      return anEvaluation
+    })
+
+    this.setState({...this.state, evaluations}, () => {
+      const evaluation = this.state.evaluations.find((evaluation) => (evaluation.name === evaluationName))
+
+      if (evaluation) {
+        const grid = evaluationsToGrid(evaluation.evaluations)
+        this.setState({...this.state, currentEvaluation: evaluation, grid})
+      }
+    })
   }
 
   render() {
