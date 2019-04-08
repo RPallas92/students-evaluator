@@ -1,6 +1,7 @@
 export interface StudentEvaluations {
   name: string
   evaluations: StudentEvaluation[]
+  gradesConfig: GradesConfig
 }
 
 export interface StudentEvaluation {

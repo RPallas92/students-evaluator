@@ -8,7 +8,7 @@ import { StudentEvaluation, StudentEvaluations, calculateGrades, GradesConfig, i
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
   value: string | number | null;
 }
-
+// TODO change percentages
 class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
 
 interface AppState {
@@ -19,6 +19,12 @@ interface AppState {
   nextConfigCandidate: GradesConfig;
   nextConfigCandidateValid: boolean;
   deleteDialogShown: boolean;
+}
+
+const defaultGradesConfig = {
+  unitsGradePercentage: 40,
+  tasksGradePercentage: 40,
+  dailyGradePercentage: 20
 }
 
 const columns = [
@@ -110,21 +116,13 @@ export class App extends React.Component<{}, AppState> {
     super(props)
 
     const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-    const evaluation = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation]}
+    const evaluation: StudentEvaluations = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig}
     this.state = {
       evaluations: [evaluation],
       currentEvaluation: evaluation,
       grid: evaluationsToGrid(evaluation.evaluations),
-      currentValidConfig: {
-        unitsGradePercentage: 40,
-        tasksGradePercentage: 40,
-        dailyGradePercentage: 20
-      },
-      nextConfigCandidate: {
-        unitsGradePercentage: 40,
-        tasksGradePercentage: 40,
-        dailyGradePercentage: 20
-      },
+      currentValidConfig: defaultGradesConfig,
+      nextConfigCandidate: defaultGradesConfig,
       nextConfigCandidateValid: true,
       deleteDialogShown: false
     }
@@ -195,7 +193,7 @@ export class App extends React.Component<{}, AppState> {
 
   addEvaluation = () => {
     const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-    const evaluation = { name: "Nueva evaluación " + Date.now(), evaluations: [firstEvaluation]}
+    const evaluation = { name: "Nueva evaluación " + Date.now(), evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig}
     const evaluations = this.state.evaluations.concat(evaluation)
     this.setState({...this.state, evaluations}, () => {
       this.changeCurrentEvaluation(evaluation.name)
@@ -213,6 +211,8 @@ export class App extends React.Component<{}, AppState> {
       return anEvaluation
     })
 
+
+    // TODO Save config
     this.setState({...this.state, evaluations}, () => {
       const evaluation = this.state.evaluations.find((evaluation) => (evaluation.name === evaluationName))
 
