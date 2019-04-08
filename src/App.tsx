@@ -8,14 +8,13 @@ import { StudentEvaluation, StudentEvaluations, calculateGrades, GradesConfig, i
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
   value: string | number | null;
 }
-// TODO change percentages
+
 class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
 
 interface AppState {
   evaluations: StudentEvaluations[];
   currentEvaluation: StudentEvaluations;
   grid: GridElement[][];
-  currentValidConfig: GradesConfig;
   nextConfigCandidate: GradesConfig;
   nextConfigCandidateValid: boolean;
   deleteDialogShown: boolean;
@@ -121,7 +120,6 @@ export class App extends React.Component<{}, AppState> {
       evaluations: [evaluation],
       currentEvaluation: evaluation,
       grid: evaluationsToGrid(evaluation.evaluations),
-      currentValidConfig: defaultGradesConfig,
       nextConfigCandidate: defaultGradesConfig,
       nextConfigCandidateValid: true,
       deleteDialogShown: false
@@ -157,8 +155,17 @@ export class App extends React.Component<{}, AppState> {
   configPercentageChanged = (newConfig: GradesConfig) => {
     console.log(newConfig)
     if (isConfigValid(newConfig)) {
-      this.setState({ ...this.state, nextConfigCandidate: newConfig, currentValidConfig: newConfig, nextConfigCandidateValid: true }, () => {
-        this.updateEvaluations(this.state.currentEvaluation.evaluations, newConfig)
+      this.setState({ ...this.state, nextConfigCandidate: newConfig, currentEvaluation: {...this.state.currentEvaluation, gradesConfig: newConfig}, nextConfigCandidateValid: true }, () => {
+        const evaluations = this.state.evaluations.map((anEvaluation) => {
+          if (anEvaluation.name === this.state.currentEvaluation.name) {
+            anEvaluation.gradesConfig = newConfig
+          }
+          return anEvaluation
+        })
+
+        this.setState({...this.state, evaluations}, () => {
+          this.updateEvaluations(this.state.currentEvaluation.evaluations, newConfig)
+        })
       })
     } else {
       this.setState({ ...this.state, nextConfigCandidate: newConfig, nextConfigCandidateValid: false })
@@ -176,7 +183,7 @@ export class App extends React.Component<{}, AppState> {
   deleteStudentsWithoutName = () => {
     const evaluations = this.state.currentEvaluation.evaluations.filter((evaluation) => evaluation.name)
     this.setState({ ...this.state, deleteDialogShown: false }, () => {
-      this.updateEvaluations(evaluations, this.state.currentValidConfig)
+      this.updateEvaluations(evaluations, this.state.currentEvaluation.gradesConfig)
     })
   }
 
@@ -203,7 +210,7 @@ export class App extends React.Component<{}, AppState> {
   changeCurrentEvaluation = (evaluationName: string) => {
     // TODO refactor as save current evaluation grades
     const currentEvaluation = this.state.currentEvaluation
-    const recalculatedEvaluations = calculateGrades(currentEvaluation.evaluations, this.state.currentValidConfig)
+    const recalculatedEvaluations = calculateGrades(currentEvaluation.evaluations, currentEvaluation.gradesConfig)
     const evaluations = this.state.evaluations.map((anEvaluation) => {
       if(anEvaluation.name === currentEvaluation.name) {
         anEvaluation.evaluations = recalculatedEvaluations
@@ -211,14 +218,12 @@ export class App extends React.Component<{}, AppState> {
       return anEvaluation
     })
 
-
-    // TODO Save config
     this.setState({...this.state, evaluations}, () => {
       const evaluation = this.state.evaluations.find((evaluation) => (evaluation.name === evaluationName))
 
       if (evaluation) {
         const grid = evaluationsToGrid(evaluation.evaluations)
-        this.setState({...this.state, currentEvaluation: evaluation, grid})
+        this.setState({...this.state, currentEvaluation: evaluation, grid, nextConfigCandidate: evaluation.gradesConfig})
       }
     })
   }
@@ -262,7 +267,7 @@ export class App extends React.Component<{}, AppState> {
                 grid[row][col] = { ...grid[row][col], value }
               })
               const evaluations = gridToEvaluations(grid)
-              const config = this.state.currentValidConfig
+              const config = this.state.currentEvaluation.gradesConfig
               this.updateEvaluations(evaluations, config, () => {
                 if (isThereAnyStudentWithoutName(evaluations)) {
                   this.setState({ ...this.state, deleteDialogShown: true })
