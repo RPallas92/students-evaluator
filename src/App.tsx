@@ -4,6 +4,7 @@ import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
 import { Pane, Button, Text, Heading, Select, TextInput, Dialog } from 'evergreen-ui';
 import { StudentEvaluation, StudentEvaluations, calculateGrades, GradesConfig, isConfigValid } from './StudentEvaluation';
+import { Database } from './Database';
 
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
   value: string | number | null;
@@ -19,6 +20,8 @@ interface AppState {
   nextConfigCandidateValid: boolean;
   deleteDialogShown: boolean;
 }
+
+const database = new Database()
 
 const defaultGradesConfig = {
   unitsGradePercentage: 40,
@@ -199,12 +202,20 @@ export class App extends React.Component<{}, AppState> {
   }
 
   addEvaluation = () => {
+
+    database.saveEvaluations(this.state.currentEvaluation).then(() => {
+      console.log("EVALUATIONS SAVED")
+    }).catch((error) => {
+      console.log(error)
+    }) // TODO RICARDO
+
     const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
     const evaluation = { name: "Nueva evaluación " + Date.now(), evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig}
     const evaluations = this.state.evaluations.concat(evaluation)
     this.setState({...this.state, evaluations}, () => {
       this.changeCurrentEvaluation(evaluation.name)
     })
+
   }
 
   changeCurrentEvaluation = (evaluationName: string) => {
