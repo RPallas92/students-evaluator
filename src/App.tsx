@@ -1,4 +1,4 @@
-import React, {  } from 'react';
+import React, { } from 'react';
 import './App.css';
 import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
@@ -12,7 +12,7 @@ export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
 
 class MyReactDataSheet extends ReactDataSheet<GridElement, number> { }
 
-interface AppState {
+export interface AppState {
   evaluations: StudentEvaluations[];
   currentEvaluation: StudentEvaluations;
   grid: GridElement[][];
@@ -116,16 +116,21 @@ function isThereAnyStudentWithoutName(evaluations: StudentEvaluation[]): boolean
 export class App extends React.Component<{}, AppState> {
   constructor(props: {}) {
     super(props)
+    const state = database.getState()
 
-    const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-    const evaluation: StudentEvaluations = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig}
-    this.state = {
-      evaluations: [evaluation],
-      currentEvaluation: evaluation,
-      grid: evaluationsToGrid(evaluation.evaluations),
-      nextConfigCandidate: defaultGradesConfig,
-      nextConfigCandidateValid: true,
-      deleteDialogShown: false
+    if (state) {
+      this.state = state
+    } else {
+      const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
+      const evaluation: StudentEvaluations = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig }
+      this.state = {
+        evaluations: [evaluation],
+        currentEvaluation: evaluation,
+        grid: evaluationsToGrid(evaluation.evaluations),
+        nextConfigCandidate: defaultGradesConfig,
+        nextConfigCandidateValid: true,
+        deleteDialogShown: false
+      }
     }
   }
 
@@ -134,7 +139,7 @@ export class App extends React.Component<{}, AppState> {
     const evaluation = { id: lastId + 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
     this.state.currentEvaluation.evaluations.push(evaluation)
     this.state.grid.push(evaluationToGridRow(evaluation))
-    this.setState(this.state)
+    this.updateState(this.state)
   }
 
   unitsGradeConfigChanged = (value: string) => {
@@ -158,7 +163,7 @@ export class App extends React.Component<{}, AppState> {
   configPercentageChanged = (newConfig: GradesConfig) => {
     console.log(newConfig)
     if (isConfigValid(newConfig)) {
-      this.setState({ ...this.state, nextConfigCandidate: newConfig, currentEvaluation: {...this.state.currentEvaluation, gradesConfig: newConfig}, nextConfigCandidateValid: true }, () => {
+      this.updateState({ ...this.state, nextConfigCandidate: newConfig, currentEvaluation: { ...this.state.currentEvaluation, gradesConfig: newConfig }, nextConfigCandidateValid: true }, () => {
         const evaluations = this.state.evaluations.map((anEvaluation) => {
           if (anEvaluation.name === this.state.currentEvaluation.name) {
             anEvaluation.gradesConfig = newConfig
@@ -166,53 +171,46 @@ export class App extends React.Component<{}, AppState> {
           return anEvaluation
         })
 
-        this.setState({...this.state, evaluations}, () => {
+        this.updateState({ ...this.state, evaluations }, () => {
           this.updateEvaluations(this.state.currentEvaluation.evaluations, newConfig)
         })
       })
     } else {
-      this.setState({ ...this.state, nextConfigCandidate: newConfig, nextConfigCandidateValid: false })
+      this.updateState({ ...this.state, nextConfigCandidate: newConfig, nextConfigCandidateValid: false })
     }
   }
 
   updateEvaluations = (evaluations: StudentEvaluation[], config: GradesConfig, callback?: () => void) => {
     const recalculatedEvaluations = calculateGrades(evaluations, config)
     const recalculatedGrid = evaluationsToGrid(recalculatedEvaluations)
-    const evaluation = { ...this.state.currentEvaluation, evaluations: recalculatedEvaluations}
+    const evaluation = { ...this.state.currentEvaluation, evaluations: recalculatedEvaluations }
 
-    this.setState({ ...this.state, grid: recalculatedGrid, currentEvaluation: evaluation}, callback)
+    this.updateState({ ...this.state, grid: recalculatedGrid, currentEvaluation: evaluation }, callback)
   }
 
   deleteStudentsWithoutName = () => {
     const evaluations = this.state.currentEvaluation.evaluations.filter((evaluation) => evaluation.name)
-    this.setState({ ...this.state, deleteDialogShown: false }, () => {
+    this.updateState({ ...this.state, deleteDialogShown: false }, () => {
       this.updateEvaluations(evaluations, this.state.currentEvaluation.gradesConfig)
     })
   }
 
   changeTitle = (title: string) => {
-    const currentEvaluation = {...this.state.currentEvaluation, name: title}
+    const currentEvaluation = { ...this.state.currentEvaluation, name: title }
     const evaluations = this.state.evaluations.map((evaluation) => {
       if (evaluation.name === this.state.currentEvaluation.name) {
         evaluation.name = title
       }
       return evaluation
     })
-    this.setState({...this.state, currentEvaluation, evaluations})
+    this.updateState({ ...this.state, currentEvaluation, evaluations })
   }
 
   addEvaluation = () => {
-
-    database.saveEvaluations(this.state.currentEvaluation).then(() => {
-      console.log("EVALUATIONS SAVED")
-    }).catch((error) => {
-      console.log(error)
-    }) // TODO RICARDO
-
     const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-    const evaluation = { name: "Nueva evaluación " + Date.now(), evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig}
+    const evaluation = { name: "Nueva evaluación " + Date.now(), evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig }
     const evaluations = this.state.evaluations.concat(evaluation)
-    this.setState({...this.state, evaluations}, () => {
+    this.updateState({ ...this.state, evaluations }, () => {
       this.changeCurrentEvaluation(evaluation.name)
     })
 
@@ -223,18 +221,27 @@ export class App extends React.Component<{}, AppState> {
     const currentEvaluation = this.state.currentEvaluation
     const recalculatedEvaluations = calculateGrades(currentEvaluation.evaluations, currentEvaluation.gradesConfig)
     const evaluations = this.state.evaluations.map((anEvaluation) => {
-      if(anEvaluation.name === currentEvaluation.name) {
+      if (anEvaluation.name === currentEvaluation.name) {
         anEvaluation.evaluations = recalculatedEvaluations
       }
       return anEvaluation
     })
 
-    this.setState({...this.state, evaluations}, () => {
+    this.updateState({ ...this.state, evaluations }, () => {
       const evaluation = this.state.evaluations.find((evaluation) => (evaluation.name === evaluationName))
 
       if (evaluation) {
         const grid = evaluationsToGrid(evaluation.evaluations)
-        this.setState({...this.state, currentEvaluation: evaluation, grid, nextConfigCandidate: evaluation.gradesConfig})
+        this.updateState({ ...this.state, currentEvaluation: evaluation, grid, nextConfigCandidate: evaluation.gradesConfig })
+      }
+    })
+  }
+
+  updateState = (state: AppState, callback?: () => void) => {
+    this.setState(state, () => {
+      database.saveState(state)
+      if(callback){
+        callback()
       }
     })
   }
@@ -249,7 +256,7 @@ export class App extends React.Component<{}, AppState> {
           value={this.state.currentEvaluation.name} />
 
         <Pane >
-          <Select width={240} marginTop={16} value={this.state.currentEvaluation.name} onChange={(event:any) => this.changeCurrentEvaluation(event.target.value)}>
+          <Select width={240} marginTop={16} value={this.state.currentEvaluation.name} onChange={(event: any) => this.changeCurrentEvaluation(event.target.value)}>
             {this.state.evaluations.map((evaluation) => (<option value={evaluation.name}>{evaluation.name}</option>))}
           </Select>
           <Button marginLeft={16} appearance="primary" onClick={this.addEvaluation}>Añadir tabla</Button>
@@ -281,7 +288,7 @@ export class App extends React.Component<{}, AppState> {
               const config = this.state.currentEvaluation.gradesConfig
               this.updateEvaluations(evaluations, config, () => {
                 if (isThereAnyStudentWithoutName(evaluations)) {
-                  this.setState({ ...this.state, deleteDialogShown: true })
+                  this.updateState({ ...this.state, deleteDialogShown: true })
                 }
               })
             }}
@@ -313,7 +320,7 @@ export class App extends React.Component<{}, AppState> {
           confirmLabel="Sí"
           cancelLabel="No"
           onConfirm={this.deleteStudentsWithoutName}
-          onCancel={() => (this.setState({ ...this.state, deleteDialogShown: false }))}>
+          onCancel={() => (this.updateState({ ...this.state, deleteDialogShown: false }))}>
           ¿Desea borrar el alumno?
       </Dialog>
 
