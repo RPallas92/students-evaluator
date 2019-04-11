@@ -3,6 +3,8 @@ import { StudentEvaluations } from "./StudentEvaluation";
 import { firebaseConfig } from "./FirebaseConfig";
 import { AppState } from "./App";
 
+const stateKey = "stateKey"
+
 export class Database {
 
     private firestore: firebase.firestore.Firestore
@@ -25,8 +27,18 @@ export class Database {
         }
     }
 
-    async saveStateOnCloud(studentEvaluations: StudentEvaluations): Promise<any> {
-        return this.firestore.collection("StudentsEvaluations").add(studentEvaluations)
+    async saveStateOnCloud(state: AppState): Promise<any> {
+        // TODO: Update if exists
+        return this.firestore.collection("StudentsEvaluationsState").add(state)
+    }
+
+    async getStateFromCloud(): Promise<AppState | null> {
+        const collection = await this.firestore.collection("StudentsEvaluationsState").get()
+        if (collection.docs.length > 0) {
+            return collection.docs[0].data() as AppState
+        } else {
+            return null
+        }
     }
 
 }
