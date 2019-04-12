@@ -1,7 +1,7 @@
 import firebase from "firebase";
 import { StudentEvaluations } from "./StudentEvaluation";
 import { firebaseConfig } from "./FirebaseConfig";
-import { AppState } from "./App";
+import App, { AppState } from "./App";
 
 const stateKey = "stateKey"
 
@@ -28,13 +28,20 @@ export class Database {
     }
 
     async saveStateOnCloud(state: AppState): Promise<any> {
-        return this.firestore.collection("StudentsEvaluationsState").doc(stateKey).set(state)
+        const cleanedState = { state: JSON.stringify(state)}
+        return this.firestore.collection("StudentsEvaluationsState").doc(stateKey).set(cleanedState)
     }
 
     async getStateFromCloud(): Promise<AppState | null> {
         const stateRef = await this.firestore.collection("StudentsEvaluationsState").doc(stateKey)
         const doc = await stateRef.get()
-        return doc.data() as AppState
+        const docData = doc.data()
+        if (docData) {
+            const flatState = docData.state as string
+            return JSON.parse(flatState) as AppState
+        } else {
+            return null
+        }
     }
 
 }

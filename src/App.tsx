@@ -116,22 +116,32 @@ function isThereAnyStudentWithoutName(evaluations: StudentEvaluation[]): boolean
 export class App extends React.Component<{}, AppState> {
   constructor(props: {}) {
     super(props)
-    const state = database.getState()
+    this.state = database.getState() || this.getEmptyState()
 
-    if (state) {
-      this.state = state
-    } else {
-      const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
-      const evaluation: StudentEvaluations = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig }
-      this.state = {
-        evaluations: [evaluation],
-        currentEvaluation: evaluation,
-        grid: evaluationsToGrid(evaluation.evaluations),
-        nextConfigCandidate: defaultGradesConfig,
-        nextConfigCandidateValid: true,
-        deleteDialogShown: false
-      }
-    }
+    database.getStateFromCloud()
+      .then((state) => {
+        if (state) {
+          this.setState(state)
+        } else {
+          console.log("Cloud state is empty")
+        }
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  getEmptyState = () => {
+    const firstEvaluation = { id: 1, name: "Ricardo Pallás", units: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], unitsGrade: 0, tasksGrade: 0, dailyGrade: 0, finalGrade: 0 }
+    const evaluation: StudentEvaluations = { name: "Lengua - Primer trimestre 2019", evaluations: [firstEvaluation], gradesConfig: defaultGradesConfig }
+    return {
+      evaluations: [evaluation],
+      currentEvaluation: evaluation,
+      grid: evaluationsToGrid(evaluation.evaluations),
+      nextConfigCandidate: defaultGradesConfig,
+      nextConfigCandidateValid: true,
+      deleteDialogShown: false
+    } as AppState
   }
 
   addRow = () => {
@@ -237,6 +247,16 @@ export class App extends React.Component<{}, AppState> {
     })
   }
 
+  saveOnCloud = () => {
+    database.saveStateOnCloud(this.state)
+      .then(() => {
+        console.log("Saved on cloud")
+      })
+      .catch((error) => {
+        console.log(`Error while saving on cloud: ${error}`)
+      }) 
+  }
+
   updateState = (state: AppState, callback?: () => void) => {
     this.setState(state, () => {
       database.saveState(state)
@@ -255,11 +275,15 @@ export class App extends React.Component<{}, AppState> {
           onChange={(e: any) => this.changeTitle(e.target.value)}
           value={this.state.currentEvaluation.name} />
 
-        <Pane >
+
+        <Button marginLeft={16} appearance="primary" onClick={this.saveOnCloud}>Guardar en la nube</Button>
+
+
+        <Pane>
           <Select width={240} marginTop={16} value={this.state.currentEvaluation.name} onChange={(event: any) => this.changeCurrentEvaluation(event.target.value)}>
             {this.state.evaluations.map((evaluation) => (<option value={evaluation.name}>{evaluation.name}</option>))}
           </Select>
-          <Button marginLeft={16} appearance="primary" onClick={this.addEvaluation}>Añadir tabla</Button>
+          <Button marginRight={16} appearance="primary" onClick={this.addEvaluation}>Añadir tabla</Button>
         </Pane>
 
         <Pane marginTop={48}>
