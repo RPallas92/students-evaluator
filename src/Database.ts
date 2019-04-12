@@ -1,7 +1,6 @@
 import firebase from "firebase";
-import { StudentEvaluations } from "./StudentEvaluation";
-import { firebaseConfig } from "./FirebaseConfig";
-import App, { AppState } from "./App";
+import { AppState } from "./Evaluator";
+import firebaseApp from "./firebaseApp";
 
 const stateKey = "stateKey"
 
@@ -10,8 +9,7 @@ export class Database {
     private firestore: firebase.firestore.Firestore
 
     constructor() {        
-        firebase.initializeApp(firebaseConfig);
-        this.firestore = firebase.firestore()
+        this.firestore = firebaseApp.firestore()
     }
 
     saveState(state: AppState) {
