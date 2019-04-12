@@ -2,7 +2,7 @@ import React, { } from 'react';
 import './App.css';
 import ReactDataSheet from 'react-datasheet';
 import "react-datasheet/lib/react-datasheet.css";
-import { Pane, Button, Text, Heading, Select, TextInput, Dialog } from 'evergreen-ui';
+import { Pane, Button, Text, Heading, Select, TextInput, Dialog, Alert } from 'evergreen-ui';
 import { StudentEvaluation, StudentEvaluations, calculateGrades, GradesConfig, isConfigValid } from './StudentEvaluation';
 import { Database } from './Database';
 
@@ -127,6 +127,7 @@ export class App extends React.Component<{}, AppState> {
         }
       })
       .catch((error) => {
+        this.showError("Error al recuperar datos de la nube. Compruebe su conexión a internet y recargue la página.")
         console.log(error)
       })
   }
@@ -253,8 +254,13 @@ export class App extends React.Component<{}, AppState> {
         console.log("Saved on cloud")
       })
       .catch((error) => {
+        this.showError("Error al guardar datos en la nube. Compruebe conexión a internet e inténtelo otra vez.")
         console.log(`Error while saving on cloud: ${error}`)
       }) 
+  }
+
+  showError = (text: string) => {
+    alert(text)
   }
 
   updateState = (state: AppState, callback?: () => void) => {
@@ -276,7 +282,7 @@ export class App extends React.Component<{}, AppState> {
           value={this.state.currentEvaluation.name} />
 
 
-        <Button marginLeft={16} appearance="primary" onClick={this.saveOnCloud}>Guardar en la nube</Button>
+        <Button className="saveOnCloudButton" marginRight={16} appearance="primary" onClick={this.saveOnCloud}>Guardar en la nube</Button>
 
 
         <Pane>

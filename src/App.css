@@ -47,6 +47,10 @@
   text-align: right;
 }
 
+.saveOnCloudButton {
+  float: right;
+}
+
 th.rotate {
   /* Something you can count on */
   height: 110px;
