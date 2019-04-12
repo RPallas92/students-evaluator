@@ -138,13 +138,14 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
   }
 
   setUpAuth = () => {
-    console.log("HAK")
-    const currentUser = firebaseApp.auth().currentUser
-    console.log(currentUser)
-    if (currentUser == null) {
-      console.log("NEEDS LOGIN")
-      this.props.history.push("/login");
-    }
+    firebaseApp.auth().onAuthStateChanged((user) => {
+      console.log(user)
+      if (user == null) {
+        console.log("NEEDS LOGIN")
+        this.props.history.push("/login");
+      }
+    })
+    
   
   }
 
