@@ -28,17 +28,13 @@ export class Database {
     }
 
     async saveStateOnCloud(state: AppState): Promise<any> {
-        // TODO: Update if exists
-        return this.firestore.collection("StudentsEvaluationsState").add(state)
+        return this.firestore.collection("StudentsEvaluationsState").doc(stateKey).set(state)
     }
 
     async getStateFromCloud(): Promise<AppState | null> {
-        const collection = await this.firestore.collection("StudentsEvaluationsState").get()
-        if (collection.docs.length > 0) {
-            return collection.docs[0].data() as AppState
-        } else {
-            return null
-        }
+        const stateRef = await this.firestore.collection("StudentsEvaluationsState").doc(stateKey)
+        const doc = await stateRef.get()
+        return doc.data() as AppState
     }
 
 }
