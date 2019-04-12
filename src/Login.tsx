@@ -12,7 +12,7 @@ const uiConfig = {
 
 };
 
-firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+firebaseApp.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
 
 class Login extends Component {
   render() {

@@ -6,6 +6,8 @@ import { Pane, Button, Text, Heading, Select, TextInput, Dialog, Alert } from 'e
 import { StudentEvaluation, StudentEvaluations, calculateGrades, GradesConfig, isConfigValid } from './StudentEvaluation';
 import { Database } from './Database';
 import firebaseApp from './firebaseApp';
+import { History } from 'history';
+
 
 export interface GridElement extends ReactDataSheet.Cell<GridElement, number> {
   value: string | number | null;
@@ -114,8 +116,8 @@ function isThereAnyStudentWithoutName(evaluations: StudentEvaluation[]): boolean
   return studentWithoutName ? true : false
 }
 
-export class Evaluator extends React.Component<{}, AppState> {
-  constructor(props: {}) {
+export class Evaluator extends React.Component<{ history: History }, AppState> {
+  constructor(props: { history: History }) {
     super(props)
     this.state = database.getState() || this.getEmptyState()
 
@@ -141,6 +143,7 @@ export class Evaluator extends React.Component<{}, AppState> {
     console.log(currentUser)
     if (currentUser == null) {
       console.log("NEEDS LOGIN")
+      this.props.history.push("/login");
     }
   
   }
