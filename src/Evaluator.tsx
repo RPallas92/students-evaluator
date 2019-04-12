@@ -123,6 +123,23 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
 
     this.setUpAuth()
 
+    this.loadStateFromCloud()
+
+  }
+
+  setUpAuth = () => {
+    firebaseApp.auth().onAuthStateChanged((user) => {
+      console.log(user)
+      if (user == null) {
+        this.props.history.push("/login");
+      } else {
+        this.loadStateFromCloud()
+      }
+    })
+    
+  }
+
+  loadStateFromCloud = () => {
     database.getStateFromCloud()
       .then((state) => {
         if (state) {
@@ -135,18 +152,6 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
         this.showError("Error al recuperar datos de la nube. Compruebe su conexión a internet y recargue la página.")
         console.log(error)
       })
-  }
-
-  setUpAuth = () => {
-    firebaseApp.auth().onAuthStateChanged((user) => {
-      console.log(user)
-      if (user == null) {
-        console.log("NEEDS LOGIN")
-        this.props.history.push("/login");
-      }
-    })
-    
-  
   }
 
   getEmptyState = () => {
