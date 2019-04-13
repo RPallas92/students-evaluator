@@ -274,6 +274,7 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
     database.saveStateOnCloud(this.state)
       .then(() => {
         console.log("Saved on cloud")
+        alert("Guardado en la nube")
       })
       .catch((error) => {
         this.showError("Error al guardar datos en la nube. Compruebe conexión a internet e inténtelo otra vez.")
