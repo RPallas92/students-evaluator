@@ -1,6 +1,6 @@
 {
   "name": "students-evaluator",
-  "homepage": "https://rpallas92.github.io/students-evaluator",
+  "homepage": "https://students-evaluations.firebaseapp.com/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
