@@ -22,6 +22,7 @@ export interface AppState {
   nextConfigCandidate: GradesConfig;
   nextConfigCandidateValid: boolean;
   deleteDialogShown: boolean;
+  logoutDialogShown: boolean;
 }
 
 const database = new Database()
@@ -163,7 +164,8 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
       grid: evaluationsToGrid(evaluation.evaluations),
       nextConfigCandidate: defaultGradesConfig,
       nextConfigCandidateValid: true,
-      deleteDialogShown: false
+      deleteDialogShown: false,
+      logoutDialogShown: false
     } as AppState
   }
 
@@ -286,6 +288,17 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
     alert(text)
   }
 
+  showLogoutAlert = () => {
+    this.updateState({ ...this.state, logoutDialogShown: true })
+  }
+
+  logout = () => {
+    this.updateState({ ...this.state, logoutDialogShown: false })
+      firebaseApp.auth().signOut()
+        .then(() => alert("Desconectado"))
+        .catch(() => this.showError("No se ha podido desconectar"))
+  }
+
   updateState = (state: AppState, callback?: () => void) => {
     this.setState(state, () => {
       database.saveState(state)
@@ -304,9 +317,7 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
           onChange={(e: any) => this.changeTitle(e.target.value)}
           value={this.state.currentEvaluation.name} />
 
-
         <Button className="saveOnCloudButton" marginRight={16} appearance="primary" onClick={this.saveOnCloud}>Guardar en la nube</Button>
-
 
         <Pane>
           <Select width={240} marginTop={16} value={this.state.currentEvaluation.name} onChange={(event: any) => this.changeCurrentEvaluation(event.target.value)}>
@@ -376,6 +387,20 @@ export class Evaluator extends React.Component<{ history: History }, AppState> {
           onCancel={() => (this.updateState({ ...this.state, deleteDialogShown: false }))}>
           ¿Desea borrar el alumno?
       </Dialog>
+
+      <Dialog
+          isShown={this.state.logoutDialogShown}
+          title="Borrar almuno"
+          intent="danger"
+          confirmLabel="Sí"
+          cancelLabel="No"
+          onConfirm={this.logout}
+          onCancel={() => (this.updateState({ ...this.state, logoutDialogShown: false }))}>
+          ¿Desea desconectarse? Asegúrese de que ha guardado los cambios en la nube.
+      </Dialog>
+
+      <Button className="saveOnCloudButton" marginRight={16} appearance="primary" onClick={this.showLogoutAlert}>Desconectar</Button>
+
 
       </Pane>
     )
